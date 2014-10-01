@@ -1,0 +1,45 @@
+# Rewrite of the Java generator code in Python
+import random, sys
+BASE_STICKY = {"A" : 0.5, "T" : 0.0, "C" : 1.0, "T" : 0.0}
+r = random.seed()
+n = nreg = 0
+seqs = None
+
+# Read sequence file
+def readSequences(fileName):
+    with open(fileName, "r") as seqFile:
+        line = seqFile.readline()
+        sline = line.split(",")
+        colFeat = 5
+        colSeq = 1
+        colII = 4
+        colBPos = colDPos = colBsize = colBSticky = colClass = -1
+        for i in range(0, len(sline)):
+            # print sline[i]
+            if sline[i].lower() == "brightpos0": colBPos = i
+            if sline[i].lower() == "darkpos0": colDPos = i
+            if sline[i].lower() == "basesize0": colBsize = i
+            if sline[i].lower() == "basesticky0": colBSticky = i
+            if sline[i].lower() == "basesticky0": colClass = i
+        print colBPos, colDPos, colBsize, colBSticky, colClass
+        nreg = colDPos - colBPos
+        # motifs
+        
+
+class Motif:
+    def __init__(self, nm, nreg):    
+        self.name = nm
+        self.isPos = nm.endswith("+")
+        self.regex = nm[0:len(nm)-1]
+        self.prob = [0]*nreg
+    def printAll(self):
+        print self.name
+        print self.isPos
+        print self.regex
+        print self.prob
+
+if __name__ == "__main__":
+    fileName = sys.argv[1]
+    readSequences(fileName)
+    m = Motif("fakeName+", 10)
+    m.printAll()
