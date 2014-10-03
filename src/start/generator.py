@@ -1,4 +1,4 @@
-import random, sys, re, math, os, env
+import random, sys, re, math, os, env, csv
 
 # Globals
 BASE_STICKY = {"A" : 0.5, "T" : 0.0, "C" : 1.0, "T" : 0.0}
@@ -39,7 +39,8 @@ class Generator:
         self.distBnum = []
         self.distDnum = []
         self.distSticky = []
-        self.distMotif = []        
+        self.distMotif = []
+        self.seqValHash = {}
 
     def getRegions(self, ind, length, numreg):
         chunk = length / numreg
@@ -196,14 +197,24 @@ class Generator:
         self.classes = [""] * self.n
         self.intensity = [0] * self.n 
 
-    def readSequences(self):
-        # n = getNumLines(fileName)
-        with open(self.fileName, "r") as seqFile:
-            line = seqFile.readline()
+    def readIntensityFile(self, fn):
+        # Read intensity file; Values could also be binary (0/1)
+        with open(fn, "r") as csvFile:
+            csvreader = csv.reader(csvFile)
+            # build Hash of Sequence, Value
+            for line in csvreader:
+                # line[0] is sequence, line[1] is intensity value
+                self.seqValHash[line[0]] = line[1]
+        # print self.seqValHash
+                
+    def readTrainingFile(self):
+        # get relevant info. from training file
+        with open(self.fileName, "r") as trainingFile:
+            line = trainingFile.readline()
             sline = line.split(",")
             colFeat = 1
             colSeq = 0
-            colII = 4
+            # colII = 4
             colBPos = colDPos = colBsize = colBSticky = colClass = -1
             for i in range(0, len(sline)):
                 # print sline[i]
@@ -221,12 +232,15 @@ class Generator:
                     self.motifs.append(Motif(sline[i].replace("_", ""), nreg))
             nr = 0
             # print bcnt
-            for line in seqFile:
+            for line in trainingFile:
                 # print sline
                 sline = line.split(",")
                 self.seqs[nr] = sline[colSeq]
                 self.classes[nr] = sline[colClass][:-1] # truncate newline
-                self.intensity[nr] = float(sline[colII])
+                # print "seq",self.seqs[nr]
+                # exit(0)
+                # self.intensity[nr] = float(sline[colII])
+                self.intensity[nr] = float(self.seqValHash[self.seqs[nr]])
                 for i in range(nreg):
                     self.bcnt[nr][i] = int(sline[colBPos+i])
                     self.dcnt[nr][i] = int(sline[colDPos+i])
@@ -328,7 +342,7 @@ class Generator:
                 # print "sequence s :",s
                 nseq.add(s)
             outf.write("Name,Sequence\n")
-            print nseq    
+            # print nseq    
             for s in nseq:
                 # if self.isClosestKnownWithin(MinD, MaxD, s):
                 outf.write("10basegen" + str(ident) + "," + s + "\n")
@@ -353,15 +367,27 @@ class Motif:
     def printAll(self):
         print "printing ALL: " + self.name, self.isPos, self.regex, self.prob
 
-def doAll(fileName, numNew, Tmin, Tmax):
-    outFileName = os.path.join(env._env['NEW_FEATURES_PATH'], fileName)
+def doAll(trainingFn, intensityFn, numNew, Tmin, Tmax, useThresholdp, threshList=None):
+    if threshList: print "threshlist",threshList
+    print "intensityFn",intensityFn
+    # exit(0)
+    outFileName = os.path.join(env._env['NEW_FEATURES_PATH'], trainingFn)
     outFileName = os.path.splitext(outFileName)[0] + "-new.csv"
-    fileName = os.path.join(env._env['TRAINING_DATA_PATH'], fileName)
-    generator = Generator(fileName)
-    generator.readSequences()
+    print "outFileName",outFileName
+    # exit(0)
+    infileName = os.path.join(env._env['TRAINING_DATA_PATH'], trainingFn)
+    print "infileName",infileName
+    # exit(0)
+    generator = Generator(infileName) # instantiate object; get num lines in file
+    # build in memory hash for Sequence,Value; 
+    generator.readIntensityFile(intensityFn) 
+    # exit(0)
+    generator.readTrainingFile()
+    # exit(0)
     generator.computeDists("bright")
+    # exit(0)
     newseqs = generator.generate(numNew)
-    print outFileName
+    # print outFileName
     generator.writeSequences(outFileName, newseqs, Tmin, Tmax)
 
 

@@ -14,12 +14,8 @@ if __name__ == "__main__":
     parser.add_argument('-tl', '--thresholdlow', type=float, help="If below this threshold, sequence in negative class")
     parser.add_argument('-g', '--generate', help="Generate new features", action="store_true")
     parser.add_argument('-v', "--verbose", help="Output debug info to stdout", dest='verbose', action="store_true")
-    parser.add_argument('-d', '--deletetmpfiles', help="Delete temporary files to clear up space", action="store_true")
     parser.add_argument('filename', help="Name of file to run on")
     args = parser.parse_args()
-    if args.deletetmpfiles:
-        util.deleteFiles(env._env['TMP_FILES_PATH'])
-        exit(0)
     if args.thresholdhigh and args.thresholdlow:
         env.USE_THRESHOLD = True
         # print "Using threshold: ", "H",args.thresholdhigh, "L", args.thresholdlow
@@ -69,11 +65,8 @@ if __name__ == "__main__":
         merciscript.runmerci(posFastaFile,negFastaFile)
         # store results in list in memory
         motifs1 = merciscript.parse_output_file("+")
-        # print "motifs1:", motifs1
-        # exit(0)
         # puts output in merciresult file
         merciscript.runmerci(negFastaFile,posFastaFile)
-        # exit(0)
         # store results in memory
         motifs2 = merciscript.parse_output_file("-")
         motifs3 = merciscript.merge_motifs(motifs1, motifs2)
@@ -90,21 +83,16 @@ if __name__ == "__main__":
             util.printSeparator(True)
     # Run LibSVM; save accuracy report
     TRAINPATH=env._env['TRAINING_DATA_PATH']
-    # training_files = [f for f in os.listdir(TRAINPATH) if os.path.isfile(os.path.join(TRAINPATH, f))]
     training_files = [os.path.join(TRAINPATH, files[0])]
-    # print training_files
-    # exit(0)
     for tfile in training_files:
         # Run LibSVM on training data.
         basename_tfile = os.path.splitext(tfile)[0]
-        if env.USE_THRESHOLD:
+        if env.USE_THRESHOLD:   
             basename_tfile = os.path.splitext(basename)[0]
         basename_tfile = basename + ".combinedfeatures.csv"
-        # exit(0)
         if args.verbose:
             util.printSeparator()
             print "Training from feature file:", basename_tfile
-        # exit(0)
         fulltfile = os.path.join(env._env['TRAINING_DATA_PATH'], basename_tfile)
         x, y = libsvm_wrapper.readData(fulltfile)
         m = svmutil.svm_train(y, x, "-v 5")
@@ -114,6 +102,10 @@ if __name__ == "__main__":
         if args.generate:
             print "Generating NEW features"
             if env.USE_THRESHOLD:
-                generator.doAll(tfile, 1000, 2, 3, True)
+                intensityFn = os.path.join(env._env['INPUT_DATA'], basename+".csv")
+                # tfileFn = os.path.join(env._env['TRAINING_DATA_PATH'], basename)
+                generator.doAll(basename_tfile, intensityFn, 1000, 2, 3, True, threshList=[args.thresholdhigh, args.thresholdlow])
             else:
-                generator.doAll(tfile, 1000, 2, 3, False)
+                intensityFn = os.path.join(env._env['INPUT_DATA'], basename+".csv")
+                generator.doAll(basename_tfile, intensityFn, 1000, 2, 3, False)
+    util.deleteFiles(env._env['TMP_FILES_PATH'])
