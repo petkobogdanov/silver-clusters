@@ -1,11 +1,43 @@
 To build:
 -----------------------------------------------------------------------
+On Linux systems:
 cd src/libsvm/libsvm-3.18/python
 make
+On OS X:
+??????? (maybe we should have three separate distributions with precompiled libsvms)
+On Windows:
+???????
 -----------------------------------------------------------------------
 
 Example runs: First, cd src/start
 -----------------------------------------------------------------------
+# run on input file 'integrated-intensity2.csv', classifying the sequences
+# with value above 67600 as positive and below 23700 as negative (ignore the rest)
+python run_all.py -th 6.76E+04 -tl 2.37E+04 integrated-intensity2.csv
+# same as before but with verbose output (-v)
 python run_all.py -th 6.76E+04 -tl 2.37E+04 -v integrated-intensity2.csv
+# also generate new features
+python run_all.py -th 6.76E+04 -tl 2.37E+04 -v -c integrated-intensity2.csv
+# perform cross validation test on features from training file and stop
+
+# run without threshold (so values in input file are either 0 or 1)
 python run_all.py integrated-intensity.csv -v
+-----------------------------------------------------------------------
+
+Input file format:
+-----------------------------------------------------------------------
+-Input files go in the directory data/input_data (todo: have path to file be specified on cmd line)
+-Each line should be of the form:
+Sequence,Value 
+-Note:There is no header line.
+-Value should either be a floating point number (possibly in scientific notation) or binary (0 or 1)
+-----------------------------------------------------------------------
+
+Output files:
+-----------------------------------------------------------------------
+-All input and output files are in the directory data/
+-data/new_features contains the new features which have been generated (if -g or --generate are specified)
+-data/tmp_files is used for temporary files and is cleaned after each run.
+-data/trained_svm contains the trained Support Vector Machine (only created if -c or --cross-validation are not specified)
+-data/training_data contains the output of MERCI. After some preprocessing it is the input to libsvm.
 -----------------------------------------------------------------------
