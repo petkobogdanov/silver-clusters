@@ -15,6 +15,7 @@ if __name__ == "__main__":
     parser.add_argument('-g', '--generate', help="Generate new features", action="store_true")
     parser.add_argument('-v', "--verbose", help="Output debug info to stdout", dest='verbose', action="store_true")
     parser.add_argument('filename', help="Name of file to run on")
+    parser.add_argument("-c", "--crossValidation", help="Perform cross-validation testing then stop", action="store_true")
     args = parser.parse_args()
     if args.thresholdhigh and args.thresholdlow:
         env.USE_THRESHOLD = True
@@ -29,6 +30,7 @@ if __name__ == "__main__":
         env.print_env()
     sys.path.append(env._env['LIBSVM_PYTHON_PATH'])
     import libsvm_wrapper, svmutil
+    from svm import *
     if args.verbose:
         util.printSeparator(True)
     # convert input files to fasta format for MERCI
@@ -95,7 +97,13 @@ if __name__ == "__main__":
             print "Training from feature file:", basename_tfile
         fulltfile = os.path.join(env._env['TRAINING_DATA_PATH'], basename_tfile)
         x, y = libsvm_wrapper.readData(fulltfile)
-        m = svmutil.svm_train(y, x, "-v 5")
+        if args.crossValidation:
+            svmutil.svm_train(y, x, "-v 5")
+            exit(0)
+        # dont perform cross validation when saving model
+        m = svmutil.svm_train(y, x)
+        modelName = os.path.join(env._env['TRAINED_SVM_PATH'] , basename+".model")
+        svmutil.svm_save_model(modelName, m)
         if args.verbose:
             util.printSeparator(True)
         # Generate new features if -g is set 

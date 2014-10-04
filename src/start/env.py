@@ -23,6 +23,10 @@ _env['NEW_FEATURES_PATH'] = os.path.abspath(
     os.path.join(_env['DATA_PATH'], "new_features")
 )
 
+_env['TRAINED_SVM_PATH'] = os.path.abspath(
+    os.path.join(_env['DATA_PATH'], "trained_svm")
+)
+
 _env['MERCI_PATH'] = os.path.abspath(os.path.join(_env['SRC_PATH'], "merci"))
 
 _env['TMP_FILES_PATH'] = os.path.abspath(
