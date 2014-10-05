@@ -50,6 +50,8 @@ if __name__ == "__main__":
         os.makedirs(env._env['TRAINING_DATA_PATH'])
     if not os.path.exists(env._env['NEW_FEATURES_PATH']):
         os.makedirs(env._env['NEW_FEATURES_PATH'])
+    if not os.path.exists(env._env['TRAINED_SVM_PATH']):
+        os.makedirs(env._env['TRAINED_SVM_PATH'])
     for f in files:
         # generate two csvs and two fastas, one of each for pos. neg.
         convertData.generateFiles(f) 
