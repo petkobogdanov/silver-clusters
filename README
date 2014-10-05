@@ -17,8 +17,9 @@ python run_all.py -th 6.76E+04 -tl 2.37E+04 integrated-intensity2.csv
 # same as before but with verbose output (-v)
 python run_all.py -th 6.76E+04 -tl 2.37E+04 -v integrated-intensity2.csv
 # also generate new features
-python run_all.py -th 6.76E+04 -tl 2.37E+04 -v -c integrated-intensity2.csv
+python run_all.py -th 6.76E+04 -tl 2.37E+04 -v -g integrated-intensity2.csv
 # perform cross validation test on features from training file and stop
+python run_all.py -th 6.76E+04 -tl 2.37E+04 -v -c integrated-intensity2.csv
 
 # run without threshold (so values in input file are either 0 or 1)
 python run_all.py integrated-intensity.csv -v
