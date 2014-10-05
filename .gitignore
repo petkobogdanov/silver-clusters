@@ -5,3 +5,4 @@ data/new_features/
 data/training_data/
 data/trained_svm
 data/tmp_files
+*.classes
