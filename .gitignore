@@ -6,3 +6,5 @@ data/training_data/
 data/trained_svm
 data/tmp_files
 *.classes
+libSVM/libsvm-3.18/libsvm.so.2
+libSVM/libsvm-3.18/svm.o
