@@ -53,8 +53,19 @@ https://www.python.org/downloads/
 	ii) Specify full path of python.exe when running
 -----------------------------------------------------------------------
 
+OS X Users:
+-----------------------------------------------------------------------
+Make sure perl & python are both installed
+-----------------------------------------------------------------------
+
+
 To cite the software:
 -----------------------------------------------------------------------
 S. Copp, P. Bogdanov, M. Debord, A. Singh, E. Gwinn, “Base Motif Recognition and Design of
 DNA Templates for Fluorescent Silver Clusters by Machine Learning,”, Journal of Advanced Materials, 2014.
+-----------------------------------------------------------------------
+
+Bug Reports:
+-----------------------------------------------------------------------
+vscerchia@gmail.com
 -----------------------------------------------------------------------
