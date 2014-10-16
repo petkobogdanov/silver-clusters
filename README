@@ -42,6 +42,17 @@ cd libsvm/libsvm-3.18/python
 make
 -----------------------------------------------------------------------
 
+Windows Users: 
+-----------------------------------------------------------------------
+1) You must have perl installed. Use:
+http://strawberryperl.com/
+2) You must download python:
+https://www.python.org/downloads/
+3) To run, you must:
+	i) Open up "cmd"
+	ii) Specify full path of python.exe when running
+-----------------------------------------------------------------------
+
 To cite the software:
 -----------------------------------------------------------------------
 S. Copp, P. Bogdanov, M. Debord, A. Singh, E. Gwinn, “Base Motif Recognition and Design of

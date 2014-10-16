@@ -56,10 +56,13 @@ def runmerci(positivefile, negativefile, topK='ALL', length=10, fp=10, fn=10, g=
     global output  
     global gap_length
     gap_length = gl
-   
+    from sys import platform as _platform
+    slash = "/"
+    if _platform == "win32":
+        slash = "\\"
     cmd = "perl " + env._env['MERCI_EXE_PATH'] + " "  
-    cmd += "-p " +env._env['TMP_FILES_PATH'] + "/{} ".format(positivefile)
-    cmd += "-n " +env._env['TMP_FILES_PATH'] + "/{} ".format(negativefile)
+    cmd += "-p " +env._env['TMP_FILES_PATH'] + slash +"{} ".format(positivefile)
+    cmd += "-n " +env._env['TMP_FILES_PATH'] + slash +"{} ".format(negativefile)
     cmd += "-k {} -l {} ".format(topK, length)
     cmd += "-fp {} -fn {} ".format(fp, fn)
     cmd += "-g {} -gl {} ".format(g, gl)
@@ -68,8 +71,11 @@ def runmerci(positivefile, negativefile, topK='ALL', length=10, fp=10, fn=10, g=
 
     if env.VERBOSE:
         print "-- Running command: "    
-        print cmd    
-    args = shlex.split(cmd)
+        print cmd
+    args = cmd
+    if _platform != "win32":
+        args = shlex.split(cmd)
+    print "\r\n\r\n",args
     p = Popen(args, stdout=PIPE, stderr=PIPE)
     out, err = p.communicate()
     output = out
