@@ -22,7 +22,7 @@ def makeClassFromThreshold(high, low, fileName):
                 outf.write(line[0]+","+str(clas)+"\n")
     
 def generateFiles(fileName):
-    print "filName",fileName
+    # print "filName",fileName
     "Convert input CSV file to fasta for MERCI"
     fullName = os.path.join(env._env['INPUT_DATA'], fileName)
     # print fileName

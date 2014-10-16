@@ -42,3 +42,8 @@ cd libsvm/libsvm-3.18/python
 make
 -----------------------------------------------------------------------
 
+To cite the software:
+-----------------------------------------------------------------------
+S. Copp, P. Bogdanov, M. Debord, A. Singh, E. Gwinn, “Base Motif Recognition and Design of
+DNA Templates for Fluorescent Silver Clusters by Machine Learning,”, Journal of Advanced Materials, 2014.
+-----------------------------------------------------------------------
