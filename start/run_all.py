@@ -6,7 +6,7 @@ import sys, env, os, argparse
 if __name__ == "__main__":
     # Execution Starts Here
 
-    # Import lilSVM libary
+    # Import libSVM libary
     sys.path.append(env._env['LIBSVM_PYTHON_PATH'])
     import libsvm_wrapper, svmutil
     from svm import *
@@ -19,6 +19,10 @@ if __name__ == "__main__":
     parser.add_argument('-v', "--verbose", help="Output debug info to stdout", dest='verbose', action="store_true")
     parser.add_argument('filename', help="Name of file to run on")
     parser.add_argument("-c", "--crossValidation", help="Perform cross-validation testing then stop", action="store_true")
+    parser.add_argument("-Mfp", "--MERCIfp", type=int, help="Argument -fp to MERCI; defaults to 10 if not specified")
+    parser.add_argument("-Mfn", "--MERCIfn", type=int, help="Argument -fn to MERCI; defaults to 10 if not specified")
+    parser.add_argument("-Mg", "--MERCIg", type=int, help="Argument -g to MERCI; defaults to 1 if not specified")
+    parser.add_argument("-Mgl", "--MERCIgl", type=int, help="Argument -gl to MERCI; defaults to 1 if not spcified")
     args = parser.parse_args()
 
     # Process command line arguments
@@ -33,8 +37,24 @@ if __name__ == "__main__":
     if args.verbose:
         env.VERBOSE = True
         env.print_env()
-    util.verbose_print(util.separatorNL)
-
+    if args.MERCIfp:
+        MERCIfp = args.MERCIfp        
+    else:
+        MERCIfp = 10
+    if args.MERCIfn:
+        MERCIfn = args.MERCIfn
+    else:
+        MERCIfn = 10
+    if args.MERCIg:
+        MERCIg = args.MERCIg
+    else:
+        MERCIg = 1
+    if args.MERCIgl:
+        MERCIgl = args.MERCIgl
+    else:
+        MERCIgl = 1
+            
+    util.verbose_print(util.separatorNL)    
     # Name of classes file will be different when using threshold
     if env.USE_THRESHOLD:
         classesFileName = args.filename+".classes"
@@ -63,13 +83,13 @@ if __name__ == "__main__":
     merciscript.initGlobals()   
 
     # Run MERCI on positive file; puts output in merciresult file
-    merciscript.runmerci(posFastaFile,negFastaFile)
+    merciscript.runmerci(posFastaFile,negFastaFile, fp=MERCIfp, fn=MERCIfn, g=MERCIg, gl=MERCIgl)
     
     # Parse results from MERCI; store data in memory
     motifs1 = merciscript.parse_output_file("+")
     
     # Run MERCI, this time on negative file; puts output in merciresult file
-    merciscript.runmerci(negFastaFile,posFastaFile)
+    merciscript.runmerci(negFastaFile,posFastaFile, fp=MERCIfp, fn=MERCIfn, g=MERCIg, gl=MERCIgl)
     
     # Parse results from MERCI; store data in memory
     motifs2 = merciscript.parse_output_file("-")
