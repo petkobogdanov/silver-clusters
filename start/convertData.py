@@ -1,6 +1,5 @@
 import csv
 import os
-from util import printSeparator
 import env
 
 def makeClassFromThreshold(high, low, fileName):

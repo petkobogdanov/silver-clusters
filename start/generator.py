@@ -368,7 +368,8 @@ class Motif:
         print "printing ALL: " + self.name, self.isPos, self.regex, self.prob
 
 def doAll(trainingFn, intensityFn, numNew, Tmin, Tmax, useThresholdp, threshList=None):
-    if threshList: print "threshlist",threshList
+    if threshList:
+        print "threshlist",threshList
     print "intensityFn",intensityFn
     # exit(0)
     outFileName = os.path.join(env._env['NEW_FEATURES_PATH'], trainingFn)

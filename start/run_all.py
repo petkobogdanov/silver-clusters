@@ -3,12 +3,15 @@ import merciscript
 import util, generator
 import sys, env, os, argparse
 
-#ROOTDIR= env._env['MAIN']
-DATA= env._env['DATA_PATH']
-INPUTDATA = env._env['INPUT_DATA']
-# SUFFS = ["-ii"]   #, "-pi", "-gfp"] 
-
 if __name__ == "__main__":
+    # Execution Starts Here
+
+    # Import lilSVM libary
+    sys.path.append(env._env['LIBSVM_PYTHON_PATH'])
+    import libsvm_wrapper, svmutil
+    from svm import *
+
+    # Add Command Line Arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-th', '--thresholdhigh', type=float, help="If above this threshold, sequence in positive class")
     parser.add_argument('-tl', '--thresholdlow', type=float, help="If below this threshold, sequence in negative class")
@@ -17,9 +20,11 @@ if __name__ == "__main__":
     parser.add_argument('filename', help="Name of file to run on")
     parser.add_argument("-c", "--crossValidation", help="Perform cross-validation testing then stop", action="store_true")
     args = parser.parse_args()
+
+    # Process command line arguments
     if args.thresholdhigh and args.thresholdlow:
         env.USE_THRESHOLD = True
-        # print "Using threshold: ", "H",args.thresholdhigh, "L", args.thresholdlow
+        # Create classes file (1's and 0's) from file with real numbers using threshold
         convertData.makeClassFromThreshold(args.thresholdhigh, args.thresholdlow, args.filename)
     else:
         env.USE_THRESHOLD = False
@@ -28,96 +33,92 @@ if __name__ == "__main__":
     if args.verbose:
         env.VERBOSE = True
         env.print_env()
-    sys.path.append(env._env['LIBSVM_PYTHON_PATH'])
-    import libsvm_wrapper, svmutil
-    from svm import *
-    if args.verbose:
-        util.printSeparator(True)
-    # convert input files to fasta format for MERCI
-    # files = [f for f in os.listdir(INPUTDATA) if os.path.isfile(os.path.join(INPUTDATA, f))]
+    util.verbose_print(util.separatorNL)
+
+    # Name of classes file will be different when using threshold
     if env.USE_THRESHOLD:
-        files = [args.filename+".classes"]
+        classesFileName = args.filename+".classes"
     else:
-        files = [os.path.basename(args.filename)]
-    numFiles = len(files)
-    # print files
-    # exit(0)
-    if args.verbose:
-        print "Running on " + str(numFiles) + " files:\n" + str(files)
-    if not os.path.exists(env._env['TMP_FILES_PATH']):
-        os.makedirs(env._env['TMP_FILES_PATH'])
-    if not os.path.exists(env._env['TRAINING_DATA_PATH']):
-        os.makedirs(env._env['TRAINING_DATA_PATH'])
-    if not os.path.exists(env._env['NEW_FEATURES_PATH']):
-        os.makedirs(env._env['NEW_FEATURES_PATH'])
-    if not os.path.exists(env._env['TRAINED_SVM_PATH']):
-        os.makedirs(env._env['TRAINED_SVM_PATH'])
-    for f in files:
-        # generate two csvs and two fastas, one of each for pos. neg.
-        convertData.generateFiles(f) 
-    # Run MERCI; save feature vectors
-    for file in files:
-        basename = os.path.splitext(file)[0]
-        if env.USE_THRESHOLD:
-            basename = os.path.splitext(basename)[0]
-        posFastaFile = basename+".POS.fa"
-        negFastaFile = basename+".NEG.fa"
-        posCSVFile = basename+".POS.csv"
-        negCSVFile = basename+".NEG.csv"
-        merciscript.initGlobals()
-        if args.verbose:
-            util.printSeparator()
-        # puts output in merciresult file
-        merciscript.runmerci(posFastaFile,negFastaFile)
-        # store results in list in memory
-        motifs1 = merciscript.parse_output_file("+")
-        # puts output in merciresult file
-        merciscript.runmerci(negFastaFile,posFastaFile)
-        # store results in memory
-        motifs2 = merciscript.parse_output_file("-")
-        motifs3 = merciscript.merge_motifs(motifs1, motifs2)
-        # exit(0)
-        if args.verbose:
-            print "num motifs " + str(len(motifs3))
-        # stores data in global variable 'data' in merciscript
-        cntb = merciscript.read_sequence_data(posCSVFile) # returns count
-        merciscript.read_sequence_data(negCSVFile)
-        merciscript.feature_vector_generator(motifs3, cntb)
-        # exit(0)
-        merciscript.save_feature_vectors(basename+".combinedfeatures.csv", basename+".combinedfeatures-occ.csv")
-        if args.verbose:
-            util.printSeparator(True)
-    # Run LibSVM; save accuracy report
+        classesFileName = args.filename
+
+    util.verbose_print(util.separator)
+    util.verbose_print("Running on " + "file: " + args.filename)    
+    util.verbose_print("Name of classes file: " + classesFileName)    
+    # Get Basename of input file
+    basename = util.getBaseName(args.filename)
+    util.verbose_print(util.separatorNL)
+
+    # Create data directories if they don't already exist
+    util.mk_dirs()
+
+    # Generate positive file and negative file (2 total) from classes file
+    convertData.generateFiles(classesFileName) 
+    
+    # Names of input files to MERCI/libSVM
+    posFastaFile = basename+".POS.fa"
+    negFastaFile = basename+".NEG.fa"
+    posCSVFile = basename+".POS.csv"
+    negCSVFile = basename+".NEG.csv"
+    
+    merciscript.initGlobals()   
+
+    # Run MERCI on positive file; puts output in merciresult file
+    merciscript.runmerci(posFastaFile,negFastaFile)
+    
+    # Parse results from MERCI; store data in memory
+    motifs1 = merciscript.parse_output_file("+")
+    
+    # Run MERCI, this time on negative file; puts output in merciresult file
+    merciscript.runmerci(negFastaFile,posFastaFile)
+    
+    # Parse results from MERCI; store data in memory
+    motifs2 = merciscript.parse_output_file("-")
+
+    # Merge results from positive and negative runs; keep data in memory
+    motifs3 = merciscript.merge_motifs(motifs1, motifs2)
+
+    util.verbose_print("Number of motifs: " + str(len(motifs3)))
+
+    # Generate features
+    cntb = merciscript.read_sequence_data(posCSVFile) # returns count
+    merciscript.read_sequence_data(negCSVFile)
+    merciscript.feature_vector_generator(motifs3, cntb)
+
+    # Save features for input to libSVM
+    merciscript.save_feature_vectors(basename+".combinedfeatures.csv", basename+".combinedfeatures-occ.csv")
+
+    util.verbose_print(util.separatorNL)
+
+    # Get name of training file
     TRAINPATH=env._env['TRAINING_DATA_PATH']
-    training_files = [os.path.join(TRAINPATH, files[0])]
-    for tfile in training_files:
-        # Run LibSVM on training data.
-        basename_tfile = os.path.splitext(tfile)[0]
-        if env.USE_THRESHOLD:   
-            basename_tfile = os.path.splitext(basename)[0]
-        basename_tfile = basename + ".combinedfeatures.csv"
-        if args.verbose:
-            util.printSeparator()
-            print "Training from feature file:", basename_tfile
-        fulltfile = os.path.join(env._env['TRAINING_DATA_PATH'], basename_tfile)
-        x, y = libsvm_wrapper.readData(fulltfile)
-        if args.crossValidation:
-            svmutil.svm_train(y, x, "-v 5")
-            exit(0)
-        # dont perform cross validation when saving model
-        m = svmutil.svm_train(y, x)
-        modelName = os.path.join(env._env['TRAINED_SVM_PATH'] , basename+".model")
-        svmutil.svm_save_model(modelName, m)
-        if args.verbose:
-            util.printSeparator(True)
-        # Generate new features if -g is set 
-        if args.generate:
-            print "Generating NEW features"
-            if env.USE_THRESHOLD:
-                intensityFn = os.path.join(env._env['INPUT_DATA'], basename+".csv")
-                # tfileFn = os.path.join(env._env['TRAINING_DATA_PATH'], basename)
-                generator.doAll(basename_tfile, intensityFn, 1000, 2, 3, True, threshList=[args.thresholdhigh, args.thresholdlow])
-            else:
-                intensityFn = os.path.join(env._env['INPUT_DATA'], basename+".csv")
-                generator.doAll(basename_tfile, intensityFn, 1000, 2, 3, False)
+    training_file = os.path.join(TRAINPATH, basename)
+    training_file = training_file + ".combinedfeatures.csv"
+    util.verbose_print("training_file " + training_file)
+
+    x, y = libsvm_wrapper.readData(training_file)
+
+    # If -c (or --crossValidation), perform cross validation and stop
+    if args.crossValidation:
+        svmutil.svm_train(y, x, "-v 5")
+        exit(0)
+
+    # Train and save model
+    m = svmutil.svm_train(y, x)
+    modelName = os.path.join(env._env['TRAINED_SVM_PATH'] , basename+".model")
+    svmutil.svm_save_model(modelName, m)
+    util.verbose_print(util.separatorNL)
+
+    # Generate new features if -g is set 
+    if args.generate:
+        util.verbose_print("Generating NEW features")
+        if env.USE_THRESHOLD:
+            intensityFn = os.path.join(env._env['INPUT_DATA'], args.filename)
+            generator.doAll(basename + ".combinedfeatures.csv", intensityFn, 1000, 2, 3, True, threshList=[args.thresholdhigh, args.thresholdlow])
+        else:
+            # Not sure if generation with classes only works "correctly"
+            print "WARNING: GENERATING ON CLASSES ONLY"
+            intensityFn = os.path.join(env._env['INPUT_DATA'], basename+".csv")
+            generator.doAll(basename_tfile, intensityFn, 1000, 2, 3, False)
+
+    # Cleanup
     util.deleteFiles(env._env['TMP_FILES_PATH'])

@@ -75,7 +75,7 @@ def runmerci(positivefile, negativefile, topK='ALL', length=10, fp=10, fn=10, g=
     args = cmd
     if _platform != "win32":
         args = shlex.split(cmd)
-    print "\r\n\r\n",args
+    # print "\r\n\r\n",args
     p = Popen(args, stdout=PIPE, stderr=PIPE)
     out, err = p.communicate()
     output = out
