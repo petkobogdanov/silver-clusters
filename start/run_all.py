@@ -17,12 +17,15 @@ if __name__ == "__main__":
     parser.add_argument('-tl', '--thresholdlow', type=float, help="If below this threshold, sequence in negative class")
     parser.add_argument('-g', '--generate', help="Generate new features", action="store_true")
     parser.add_argument('-v', "--verbose", help="Output debug info to stdout", dest='verbose', action="store_true")
-    parser.add_argument('filename', help="Name of file to run on")
+    parser.add_argument('filename', help="Name of file to run on (located input_data directory)")
     parser.add_argument("-c", "--crossValidation", help="Perform cross-validation testing then stop", action="store_true")
-    parser.add_argument("-Mfp", "--MERCIfp", type=int, help="Argument -fp to MERCI; defaults to 10 if not specified")
-    parser.add_argument("-Mfn", "--MERCIfn", type=int, help="Argument -fn to MERCI; defaults to 10 if not specified")
-    parser.add_argument("-Mg", "--MERCIg", type=int, help="Argument -g to MERCI; defaults to 1 if not specified")
-    parser.add_argument("-Mgl", "--MERCIgl", type=int, help="Argument -gl to MERCI; defaults to 1 if not spcified")
+    parser.add_argument("-Mfp", "--MERCIfp", type=int, help="Argument -fp to MERCI; the minimal frequency (absolute number) \
+    for the positive sequence (defaults to 10 if not specified)")
+    parser.add_argument("-Mfn", "--MERCIfn", type=int, help="Argument -fn to MERCI; the maximal frequency (absolute number) \
+    for the negative sequences (defaults to 10 if not specified)")
+    parser.add_argument("-Mg", "--MERCIg", type=int, help="Argument -g to MERCI; maximal number of gaps \
+    (defaults to 1 if not specified)")
+    parser.add_argument("-Mgl", "--MERCIgl", type=int, help="Argument -gl to MERCI; maximal gap length (defaults to 1 if not spcified)")
     args = parser.parse_args()
 
     # Process command line arguments

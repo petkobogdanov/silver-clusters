@@ -20,7 +20,7 @@ python run_all.py integrated-intensity.csv -v
 
 Input file format:
 -----------------------------------------------------------------------
--Input files go in the directory data/input_data 
+-Input files go in the directory data/input_data (data\input_data on Windows)
 -Each line should be of the form:
 Sequence,Value 
 -Note:There is no header line.
@@ -29,11 +29,11 @@ Sequence,Value
 
 Output files:
 -----------------------------------------------------------------------
--All input and output files are in the directory data/
--data/new_features contains the new features which have been generated (if -g or --generate are specified)
--data/tmp_files is used for temporary files and is cleaned after each run.
--data/trained_svm contains the trained Support Vector Machine (only created if -c or --cross-validation are not specified)
--data/training_data contains the output of MERCI. After some preprocessing it is the input to libsvm.
+-All input and output files are in subdirectories in the directory "data"
+-data/new_features (data\new_features on Windows) contains the new features which have been generated (if -g or --generate are specified)
+-data/tmp_files (data\tmp_files on Windows) is used for temporary files and is cleaned after each run.
+-data/trained_svm (data\trained_svm on Windows) contains the trained Support Vector Machine (only created if -c or --cross-validation are not specified)
+-data/training_data (data\training_data on Windows) contains the output of MERCI. After some preprocessing it is the input to libsvm.
 -----------------------------------------------------------------------
 
 To build: (linux only)
